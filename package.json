@@ -1,0 +1,20 @@
+{
+  "name": "wordle-helper",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "generate-words": "node scripts/generate-words.mjs",
+    "predev": "npm run generate-words",
+    "prebuild": "npm run generate-words"
+  },
+  "devDependencies": {
+    "vite": "^8.1.1"
+  },
+  "dependencies": {
+    "an-array-of-english-words": "^2.0.0"
+  }
+}
