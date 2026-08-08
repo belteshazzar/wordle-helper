@@ -1,0 +1,106 @@
+# Words the app will not put forward as an answer.
+#
+# The word list is a general English dictionary, not Wordle's curated answer
+# set, so it contains these. Left alone they surface unprompted: constrain the
+# board a little and the suggestion column fills with them.
+#
+# This file is the only copy of the list. scripts/generate-words.mjs strips
+# these words as it builds src/words.json, so the web app never has them.
+#
+# The iOS port reads the same file out of this repo rather than keeping its
+# own: its Scripts/sync-words.sh copies this one across, and a test fails if
+# the two ever disagree.
+#
+# Blank lines and anything after a # are ignored. Five letters, lowercase.
+#
+# What is deliberately NOT here:
+#
+#   Ordinary words carrying a history -- crazy, idiot, loony, moron, nutty,
+#   dummy. Common English; removing them would gut the vocabulary without
+#   making anyone safer.
+#
+#   Anatomy -- penis, vulva, labia, semen, gonad, pubes, pubic. Clinical, not
+#   profane.
+#
+#   Words whose innocent reading dominates -- balls, tarts, knobs, prick,
+#   tramp, spunk, wench, bawdy, randy, sexed, dicky, paddy, hebes, kafir,
+#   mongo, hunky, nancy, pansy, fairy, queer, trans, goyim, slope, slant.
+#
+# Where a word is both -- a chink in armour, a raccoon, a Dutch dyke,
+# sauerkraut, spick and span -- it is blocked anyway. The cost is a word that
+# is never suggested but can still be typed, against the alternative of it
+# appearing on screen unbidden.
+
+# --- Identity slurs -------------------------------------------------------
+# Ethnic and racial
+boong
+chink
+cholo
+coons
+dagos
+darky
+gippo
+gipsy
+gooks
+gyppo
+gypsy
+honky
+kikes
+kraut
+micks
+negro
+sambo
+spick
+spics
+squaw
+taigs
+
+# Sexuality
+dykes
+faggy
+fagot
+homos
+poofs
+poove
+
+# Disability
+gimpy
+spazz
+
+# --- Profanity and sexual vulgarity ---------------------------------------
+arsed
+arses
+arsey
+bimbo
+bitch
+boobs
+cocks
+craps
+cunts
+dicks
+dildo
+dongs
+fanny
+farts
+felch
+frigs
+fucks
+horny
+hussy
+minge
+nonce
+pissy
+poops
+porno
+shags
+shite
+shits
+skank
+slags
+sluts
+titty
+turds
+twats
+wanks
+wanky
+whore
