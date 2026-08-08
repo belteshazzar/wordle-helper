@@ -13,7 +13,8 @@ const KEYBOARD_ROWS = [
 
 const state = {
   cells: Array.from({ length: MAX_CELLS }, () => ({ letter: '', mark: null })),
-  cursor: 0
+  cursor: 0,
+  helpOpen: false
 }
 
 const app = document.querySelector('#app')
@@ -21,6 +22,8 @@ const app = document.querySelector('#app')
 app.innerHTML = `
   <header class="app-header">
     <h1>Wordle Helper</h1>
+    <button id="help-toggle" class="help-toggle" type="button" aria-expanded="false"
+      aria-controls="help" aria-label="Show help">?</button>
   </header>
   <div class="content">
     <div id="board" class="board"></div>
@@ -31,6 +34,32 @@ app.innerHTML = `
       <ul id="word-list" class="word-list"></ul>
     </aside>
   </div>
+  <section id="help" class="help" hidden>
+    <h2>How to use</h2>
+    <p>
+      Type the word you guessed in Wordle using the keyboard, then click each
+      letter to tell the helper how Wordle marked it.
+    </p>
+    <ul class="help-marks">
+      <li>
+        <span class="cell grey" aria-hidden="true">N</span>
+        <span>The letter is <b>not</b> in the word.</span>
+      </li>
+      <li>
+        <span class="cell yellow" aria-hidden="true">M</span>
+        <span>The letter is in the word, but <b>not in that position</b>.</span>
+      </li>
+      <li>
+        <span class="cell green" aria-hidden="true">Y</span>
+        <span>The letter is in the word, <b>in that position</b>.</span>
+      </li>
+    </ul>
+    <p>
+      Clicking a letter cycles it grey → yellow → green. The list on the right
+      shows every word still possible, and narrows as you mark more letters.
+      Enter your next guess on the following row.
+    </p>
+  </section>
   <div id="keyboard" class="keyboard"></div>
 `
 
@@ -38,6 +67,8 @@ const boardEl = document.querySelector('#board')
 const keyboardEl = document.querySelector('#keyboard')
 const wordListEl = document.querySelector('#word-list')
 const wordCountEl = document.querySelector('#word-count')
+const helpEl = document.querySelector('#help')
+const helpToggleEl = document.querySelector('#help-toggle')
 
 function renderBoard() {
   boardEl.innerHTML = ''
@@ -222,7 +253,29 @@ function handleBackspace() {
   renderWordList()
 }
 
+// Help replaces the board, word list and keyboard rather than floating over
+// them, so there is only ever one scene on screen.
+function setHelpOpen(open) {
+  state.helpOpen = open
+  app.classList.toggle('help-open', open)
+  helpEl.hidden = !open
+  helpToggleEl.textContent = open ? '✕' : '?'
+  helpToggleEl.setAttribute('aria-expanded', String(open))
+  helpToggleEl.setAttribute('aria-label', open ? 'Close help' : 'Show help')
+}
+
 function handleKeydown(event) {
+  if (event.key === 'Escape' && state.helpOpen) {
+    event.preventDefault()
+    setHelpOpen(false)
+    return
+  }
+
+  // Keystrokes would otherwise edit the hidden board while help is up.
+  if (state.helpOpen) {
+    return
+  }
+
   const key = event.key.toUpperCase()
 
   if (/^[A-Z]$/.test(key)) {
@@ -237,6 +290,7 @@ function handleKeydown(event) {
   }
 }
 
+helpToggleEl.addEventListener('click', () => setHelpOpen(!state.helpOpen))
 document.addEventListener('keydown', handleKeydown)
 
 renderBoard()

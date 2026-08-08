@@ -1,4 +1,44 @@
 :root {
+  /* Gap between board cells; the page uses it horizontally too, so the
+     outer edge of the board sits the same distance from the screen edge
+     as the cells sit from each other. */
+  --cell-gap: 8px;
+
+  /* Backing for the word panel; deliberately lighter than the keyboard's
+     #d3d6da so the two greys don't read as the same surface. */
+  --panel-grey: #e6e8ea;
+
+  /* The floor must stay below 5.07vw at the narrowest supported width (320px
+     -> 16.2px), or the heading grows past its 3/4 share and runs into the
+     help button. */
+  --heading-size: clamp(1rem, 5.07vw, 5rem);
+  --heading-line: 1.1;
+  --key-height: 42px;
+  /* Extra clearance under the keyboard, past the page padding. The safe-area
+     term is only added at the real bottom edge, where a home indicator can
+     actually sit. */
+  --keyboard-lift-base: 24px;
+  --keyboard-lift: calc(var(--keyboard-lift-base) + env(safe-area-inset-bottom));
+
+  /* The space showing under the keyboard, reused above and below the heading
+     so the heading gets matching breathing room. */
+  --heading-space: calc(var(--cell-gap) + var(--keyboard-lift-base));
+
+  /* Everything above/below the board, so the board can work out how much
+     height is left. Derived rather than hardcoded because the heading
+     scales with viewport width. */
+  /* The help button can be taller than the heading text on small screens, and
+     it sets the header's min-height, so the board must budget for whichever
+     is larger. */
+  --heading-height: max(calc(var(--heading-size) * var(--heading-line)), var(--key-height));
+  --keyboard-height: calc(3 * var(--key-height) + 2 * var(--cell-gap));
+  /* 100dvh less: the top padding, the heading, the space under the heading,
+     the board-to-keyboard gap, the keyboard, its lift, and the bottom padding. */
+  --board-height: calc(
+    100dvh - 2 * var(--heading-space) - var(--heading-height) - 2 * var(--cell-gap) -
+      var(--keyboard-height) - var(--keyboard-lift)
+  );
+
   font-family: Inter, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -35,46 +75,145 @@ input {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px;
-  gap: 16px;
+  padding: var(--heading-space) var(--cell-gap) var(--cell-gap);
+  gap: var(--cell-gap);
 }
 
+/* Tops up the flex gap so the space below the heading matches the space above
+   it, rather than the one cell-gap every other element gets. */
 .app-header {
+  position: relative;
   flex-shrink: 0;
+  width: 100%;
+  margin-bottom: calc(var(--heading-space) - var(--cell-gap));
+  min-height: var(--key-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
-.app-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  letter-spacing: -0.02em;
+/* Sized and set exactly like a keyboard key. The header is the same width as
+   the keyboard, so the key's own width formula resolves to the same value
+   here; only the background differs, to match the word panel. */
+.help-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: calc((100% - 9 * var(--cell-gap)) / 10);
+  height: var(--key-height);
+  border: 0;
+  padding: 0;
+  background: var(--panel-grey);
+  color: #1a1a1b;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 120ms ease;
 }
 
+.help-toggle:hover {
+  background: #d3d6da;
+}
+
+/* Tracked-out caps sized to span ~3/4 of the page. Both the size (vw) and
+   the tracking (em) scale with the viewport, so that fraction holds at any
+   width; the clamp just stops it running away on very small/large screens.
+   The negative right margin cancels the trailing letter-space so the words
+   stay optically centred. */
+.app-header h1 {
+  display: inline-block;
+  margin: 0 -0.5em 0 0;
+  font-size: var(--heading-size);
+  line-height: var(--heading-line);
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+}
+
+/* The help scene takes over the whole area the board, word list and keyboard
+   occupy — including the keyboard's bottom lift — so nothing shows through. */
+.help {
+  display: none;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding: var(--cell-gap);
+  margin-bottom: var(--keyboard-lift);
+  background: var(--panel-grey);
+}
+
+#app.help-open .help {
+  display: block;
+}
+
+#app.help-open .content,
+#app.help-open .keyboard {
+  display: none;
+}
+
+/* Body size like everything else; the bold weight carries the hierarchy. */
+.help h2 {
+  margin: 0 0 var(--cell-gap);
+  font-size: 1rem;
+}
+
+.help p,
+.help ul {
+  margin: 0 0 var(--cell-gap);
+}
+
+/* Real board squares stand in for the bullet and the colour's name, so the
+   help shows the same thing the player sees on the board. */
+.help-marks {
+  list-style: none;
+  padding-left: 0;
+}
+
+.help-marks li {
+  display: flex;
+  align-items: center;
+  gap: var(--cell-gap);
+  margin-bottom: var(--cell-gap);
+}
+
+.help-marks .cell {
+  width: var(--key-height);
+  flex: none;
+  font-size: 1rem;
+}
+
+/* One cell-gap apart rather than space-between, so the word list sits beside
+   the board instead of being pushed to the far edge. Centring only acts on
+   leftover space, so the pair drifts to the middle once the board hits its
+   height cap on a wide screen, and stays flush left when the row is full. */
 .content {
   flex: 1;
   min-height: 0;
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: center;
+  gap: var(--cell-gap);
   width: 100%;
 }
 
-/* The board grows to fill the row, capped only by the viewport height
-   (minus header, keyboard, and page gaps) so all six rows of square
-   cells always fit on screen. */
+/* The board grows to fill the row, capped by the width at which six rows of
+   square cells exactly consume --board-height, so it never runs under the
+   keyboard. Six rows separated by five gaps give a cell of
+   (height - 5 * gap) / 6; five of those plus four gaps give the width. */
 .board {
   display: grid;
-  gap: 8px;
+  gap: var(--cell-gap);
   align-content: start;
   flex: 1;
   min-width: 0;
-  max-width: calc((100dvh - 250px) * 5 / 6);
+  max-width: calc((var(--board-height) - 5 * var(--cell-gap)) * 5 / 6 + 4 * var(--cell-gap));
 }
 
 .board-row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+  gap: var(--cell-gap);
 }
 
 .cell {
@@ -122,20 +261,23 @@ input {
   gap: 8px;
   flex-shrink: 0;
   width: 100%;
+  /* Lift the keys clear of the bottom edge (and of on-screen home
+     indicators on mobile). */
+  margin-bottom: var(--keyboard-lift);
 }
 
 .keyboard-row {
   display: flex;
-  gap: 6px;
+  gap: var(--cell-gap);
   justify-content: center;
 }
 
 /* All keys share the width that makes the 10-key top row span exactly
    full width; shorter rows keep that key size and sit centered. */
 .key {
-  width: calc((100% - 9 * 6px) / 10);
+  width: calc((100% - 9 * var(--cell-gap)) / 10);
   flex: none;
-  height: 42px;
+  height: var(--key-height);
   border: 0;
   background: #d3d6da;
   color: #1a1a1b;
@@ -150,32 +292,50 @@ input {
 }
 
 .key.key-wide {
-  width: calc(1.5 * (100% - 9 * 6px) / 10 + 6px);
-  font-size: 1.1rem;
+  width: calc(1.5 * (100% - 9 * var(--cell-gap)) / 10 + var(--cell-gap));
 }
 
+/* Fixed width so the board never shifts as the match list grows, shrinks,
+   or empties out entirely. */
 .words-panel {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  width: max-content;
-  flex-shrink: 0;
+  width: 140px;
+  flex: none;
+}
+
+@media (max-width: 400px) {
+  .words-panel {
+    width: 104px;
+  }
 }
 
 .word-list-header {
-  margin-bottom: 8px;
+  margin-bottom: var(--cell-gap);
+  padding: var(--cell-gap);
   text-align: center;
+  background: var(--panel-grey);
+}
+
+/* Matches .word-list li so the count reads as part of the list. */
+.word-list-header #word-count {
+  font-weight: 700;
 }
 
 .word-list {
   list-style: none;
-  padding: 0;
+  padding: var(--cell-gap);
   margin: 0;
+  background: var(--panel-grey);
   display: grid;
   gap: 2px;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  /* Reserve the scrollbar track so words stay put when the list gets
+     short enough to stop scrolling. */
+  scrollbar-gutter: stable;
   align-content: start;
 }
 
@@ -189,5 +349,7 @@ input {
 .word-list li.word-list-more {
   text-transform: none;
   letter-spacing: normal;
+  white-space: normal;
+  font-weight: 400;
   opacity: 0.6;
 }

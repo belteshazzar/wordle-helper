@@ -2,9 +2,25 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wordle Helper</title>
+    <meta
+      name="description"
+      content="Narrow down the possible Wordle answers from the letters you have already guessed."
+    />
+
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#f7f7f5" />
+
+    <!-- iOS home screen. Safari ignores the manifest's name and icons when
+         adding to the home screen, so these have to be repeated here, and the
+         touch icon has to be a PNG -- SVG is not supported. -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Wordle Helper" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   </head>
   <body>
     <div id="app"></div>
