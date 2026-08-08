@@ -9,9 +9,12 @@
     "preview": "vite preview",
     "generate-words": "node scripts/generate-words.mjs",
     "predev": "npm run generate-words",
-    "prebuild": "npm run generate-words"
+    "prebuild": "npm run generate-words",
+    "pretest": "npm run generate-words",
+    "test": "node test/extract.test.mjs"
   },
   "devDependencies": {
+    "playwright-core": "^1.62.1",
     "vite": "^8.1.1"
   },
   "dependencies": {

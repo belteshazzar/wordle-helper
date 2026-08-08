@@ -1,5 +1,6 @@
 import './style.css'
 import WORDS from './words.json'
+import { extractGuesses } from './extract.js'
 
 const MAX_ROWS = 6
 const MAX_COLS = 5
@@ -21,8 +22,11 @@ const app = document.querySelector('#app')
 
 app.innerHTML = `
   <header class="app-header">
+    <button id="load-shot" class="header-button load-toggle" type="button"
+      aria-label="Load a Wordle screenshot" title="Load a Wordle screenshot">+</button>
+    <input id="shot-input" class="visually-hidden" type="file" accept="image/*" />
     <h1>Wordle Helper</h1>
-    <button id="help-toggle" class="help-toggle" type="button" aria-expanded="false"
+    <button id="help-toggle" class="header-button help-toggle" type="button" aria-expanded="false"
       aria-controls="help" aria-label="Show help">?</button>
   </header>
   <div class="content">
@@ -59,8 +63,15 @@ app.innerHTML = `
       shows every word still possible, and narrows as you mark more letters.
       Enter your next guess on the following row.
     </p>
+    <h2>Loading a screenshot</h2>
+    <p>
+      Press <b>+</b> to pick a screenshot of your Wordle board, or just paste or
+      drag one onto the page. The guessed rows and their colours are read
+      straight off the picture, so you do not have to type them in.
+    </p>
   </section>
   <div id="keyboard" class="keyboard"></div>
+  <p id="toast" class="toast" role="status" hidden></p>
 `
 
 const boardEl = document.querySelector('#board')
@@ -69,6 +80,9 @@ const wordListEl = document.querySelector('#word-list')
 const wordCountEl = document.querySelector('#word-count')
 const helpEl = document.querySelector('#help')
 const helpToggleEl = document.querySelector('#help-toggle')
+const loadShotEl = document.querySelector('#load-shot')
+const shotInputEl = document.querySelector('#shot-input')
+const toastEl = document.querySelector('#toast')
 
 function renderBoard() {
   boardEl.innerHTML = ''
@@ -253,6 +267,79 @@ function handleBackspace() {
   renderWordList()
 }
 
+let toastTimer = null
+
+function showToast(message) {
+  toastEl.textContent = message
+  toastEl.hidden = false
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => {
+    toastEl.hidden = true
+  }, 4000)
+}
+
+function createCanvas(width, height) {
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  return canvas
+}
+
+function loadImage(source) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(source)
+    const image = new Image()
+    image.onload = () => {
+      URL.revokeObjectURL(url)
+      resolve(image)
+    }
+    image.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('could not decode image'))
+    }
+    image.src = url
+  })
+}
+
+function applyGuesses(rows) {
+  state.cells = Array.from({ length: MAX_CELLS }, () => ({ letter: '', mark: null }))
+
+  rows.slice(0, MAX_ROWS).forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      state.cells[rowIndex * MAX_COLS + colIndex] = { letter: cell.letter, mark: cell.mark }
+    })
+  })
+
+  state.cursor = Math.min(rows.length, MAX_ROWS) * MAX_COLS
+  renderBoard()
+  renderWordList()
+}
+
+async function loadScreenshot(source) {
+  if (!source) return
+
+  try {
+    const image = await loadImage(source)
+    const canvas = createCanvas(image.width, image.height)
+    const context = canvas.getContext('2d', { willReadFrequently: true })
+    context.drawImage(image, 0, 0)
+
+    const pixels = context.getImageData(0, 0, image.width, image.height)
+    const { rows } = extractGuesses(pixels, WORDS, createCanvas)
+
+    if (!rows.length) {
+      showToast('No Wordle board found in that image.')
+      return
+    }
+
+    setHelpOpen(false)
+    applyGuesses(rows)
+    showToast(`Loaded ${rows.length} guess${rows.length === 1 ? '' : 'es'}.`)
+  } catch {
+    showToast('Could not read that image.')
+  }
+}
+
 // Help replaces the board, word list and keyboard rather than floating over
 // them, so there is only ever one scene on screen.
 function setHelpOpen(open) {
@@ -292,6 +379,28 @@ function handleKeydown(event) {
 
 helpToggleEl.addEventListener('click', () => setHelpOpen(!state.helpOpen))
 document.addEventListener('keydown', handleKeydown)
+
+loadShotEl.addEventListener('click', () => shotInputEl.click())
+shotInputEl.addEventListener('change', () => {
+  loadScreenshot(shotInputEl.files[0])
+  // Reset so picking the same file twice still fires a change event.
+  shotInputEl.value = ''
+})
+
+document.addEventListener('paste', (event) => {
+  const item = [...(event.clipboardData?.items ?? [])].find((i) => i.type.startsWith('image/'))
+  if (!item) return
+  event.preventDefault()
+  loadScreenshot(item.getAsFile())
+})
+
+document.addEventListener('dragover', (event) => event.preventDefault())
+document.addEventListener('drop', (event) => {
+  const file = event.dataTransfer?.files?.[0]
+  if (!file?.type.startsWith('image/')) return
+  event.preventDefault()
+  loadScreenshot(file)
+})
 
 renderBoard()
 renderKeyboard()

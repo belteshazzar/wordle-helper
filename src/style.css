@@ -95,10 +95,10 @@ input {
 
 /* Sized and set exactly like a keyboard key. The header is the same width as
    the keyboard, so the key's own width formula resolves to the same value
-   here; only the background differs, to match the word panel. */
-.help-toggle {
+   here; only the background differs, to match the word panel. The heading
+   takes the middle 3/4, leaving one key-width slot free at each end. */
+.header-button {
   position: absolute;
-  right: 0;
   top: 50%;
   transform: translateY(-50%);
   width: calc((100% - 9 * var(--cell-gap)) / 10);
@@ -112,8 +112,44 @@ input {
   transition: background 120ms ease;
 }
 
-.help-toggle:hover {
+.header-button:hover {
   background: #d3d6da;
+}
+
+.load-toggle {
+  left: 0;
+}
+
+.help-toggle {
+  right: 0;
+}
+
+/* Kept in the accessibility tree but out of the layout, so the file picker
+   can be opened by the styled button instead. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Fixed rather than in flow, so transient messages never disturb the
+   board/keyboard spacing. */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--keyboard-lift) + var(--keyboard-height) + 2 * var(--cell-gap));
+  transform: translateX(-50%);
+  max-width: calc(100% - 4 * var(--cell-gap));
+  margin: 0;
+  padding: var(--cell-gap);
+  background: #1a1a1b;
+  color: #ffffff;
+  text-align: center;
 }
 
 /* Tracked-out caps sized to span ~3/4 of the page. Both the size (vw) and
