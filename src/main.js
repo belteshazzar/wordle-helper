@@ -25,7 +25,7 @@ app.innerHTML = `
     <button id="load-shot" class="header-button load-toggle" type="button"
       aria-label="Load a Wordle screenshot" title="Load a Wordle screenshot">+</button>
     <input id="shot-input" class="visually-hidden" type="file" accept="image/*" />
-    <h1>Wordle Helper</h1>
+    <h1>Streak Saviour</h1>
     <button id="help-toggle" class="header-button help-toggle" type="button" aria-expanded="false"
       aria-controls="help" aria-label="Show help">?</button>
   </header>

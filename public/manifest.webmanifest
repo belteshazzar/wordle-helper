@@ -1,6 +1,6 @@
 {
-  "name": "Wordle Helper",
-  "short_name": "Wordle Helper",
+  "name": "Streak Saviour",
+  "short_name": "Streak Saviour",
   "description": "Narrow down the possible Wordle answers from the letters you have already guessed.",
   "start_url": ".",
   "scope": ".",
