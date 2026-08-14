@@ -155,14 +155,17 @@ input {
 /* Tracked-out caps sized to span ~3/4 of the page. Both the size (vw) and
    the tracking (em) scale with the viewport, so that fraction holds at any
    width; the clamp just stops it running away on very small/large screens.
-   The negative right margin cancels the trailing letter-space so the words
-   stay optically centred. */
+   The size was tuned for the 13 characters of "Wordle Helper" at 0.5em;
+   "Streak Saviour" is one character longer, so the tracking gives back what
+   the extra letter took and the heading keeps its share of the width. The
+   negative right margin cancels the trailing letter-space so the words stay
+   optically centred. */
 .app-header h1 {
   display: inline-block;
-  margin: 0 -0.5em 0 0;
+  margin: 0 -0.45em 0 0;
   font-size: var(--heading-size);
   line-height: var(--heading-line);
-  letter-spacing: 0.5em;
+  letter-spacing: 0.45em;
   text-transform: uppercase;
 }
 
