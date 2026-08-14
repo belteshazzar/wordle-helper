@@ -8,10 +8,15 @@
 const TILE_SIZE = 16 // glyph feature grid, TILE_SIZE^2 dimensions
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
-// Every Wordle theme, since the palette is the only thing that tells a
-// present letter from a correct one. High contrast swaps the hues entirely:
-// orange means correct and blue means present.
+// Every tile colour the supported games ship, since the palette is the only
+// thing that tells a present letter from a correct one. NYT Wordle's high
+// contrast theme swaps the hues entirely: orange means correct and blue means
+// present. The "Wordle!" app (Lion Studios, Android/iOS) draws the same board
+// in its own colours, so it gets its own entries. Two entries may share a
+// theme and a mark -- they are then the same colour class from different
+// games, and everything downstream treats them as interchangeable.
 const PALETTES = [
+  // NYT Wordle.
   { theme: 'light', mark: 'grey', rgb: [120, 124, 126] },
   { theme: 'light', mark: 'yellow', rgb: [201, 180, 88] },
   { theme: 'light', mark: 'green', rgb: [106, 170, 100] },
@@ -19,7 +24,14 @@ const PALETTES = [
   { theme: 'dark', mark: 'yellow', rgb: [181, 159, 59] },
   { theme: 'dark', mark: 'green', rgb: [83, 141, 78] },
   { theme: 'highContrast', mark: 'yellow', rgb: [133, 192, 249] },
-  { theme: 'highContrast', mark: 'green', rgb: [245, 121, 58] }
+  { theme: 'highContrast', mark: 'green', rgb: [245, 121, 58] },
+  // "Wordle!" app, light theme. Grey and yellow are sampled from the fixture
+  // screenshot; green is sampled from gameplay footage and is approximate,
+  // pending a fixture with a correct letter in it. The app's dark themes use
+  // other colours again and are not supported yet.
+  { theme: 'light', mark: 'grey', rgb: [128, 126, 137] },
+  { theme: 'light', mark: 'yellow', rgb: [245, 205, 71] },
+  { theme: 'light', mark: 'green', rgb: [167, 215, 110] }
 ]
 
 const COLOUR_TOLERANCE = 30 // per-channel euclidean distance

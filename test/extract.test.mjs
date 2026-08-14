@@ -41,7 +41,10 @@ const EXPECTED = {
     'FRIAR:GGggg',
     'FROST:GGGgg',
     'FROND:GGGGG'
-  )
+  ),
+
+  // The "Wordle!" app rather than NYT Wordle.
+  'android-wordle-light.jpg': board('PALED:gyyyg', 'LATER:yygyy')
 }
 
 const CHROME =
